@@ -1,0 +1,7 @@
+---
+# server side
+git_engine: 'https://github.com/repjov/wiki-docker-raneto.git'
+git_content: 'git@gitlab.lodoss.team:work/playbook.git'
+engine_folder: /var/www/playbook/wiki
+content_folder: /var/www/playbook/wiki-content
+user: vagrant

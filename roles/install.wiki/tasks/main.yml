@@ -1,0 +1,68 @@
+---
+# - name: Ensure www folder exist
+#   become: true
+#   file:
+#     path: '{{ engine_folder }}'
+#     group: www-data
+#     owner: {{user}}
+#     state: directory
+#     mode: 775
+#     # recurse: yes
+
+- name: Download Raneto-docker
+  become: true
+  git:
+    repo: '{{ git_engine }}'
+    dest: '{{ engine_folder }}'
+    accept_hostkey: yes
+    force: yes
+
+- name: Update permissions {{ engine_folder }}
+  become: true
+  file:
+    path: '{{ engine_folder }}'
+    group: www-data
+    owner: "{{ user }}"
+    state: directory
+    mode: u=rwX,g=rX,o=rX
+    recurse: yes
+
+- name: Download Content
+  become: true
+  git:
+    repo: '{{ git_content }}'
+    dest: '{{ content_folder }}'
+    accept_hostkey: yes
+    force: yes
+    
+
+- name: Update permissions {{ content_folder }}
+  become: true
+  file:
+    path: '{{ content_folder }}'
+    group: www-data
+    owner: "{{ user }}"
+    state: directory
+    mode: u=rwX,g=rX,o=rX
+    recurse: yes
+
+- name: Clear Raneto-docker
+  # shell: make run
+  shell: make clear
+  args:
+    chdir: '{{ engine_folder }}'
+  become: true
+
+- name: Start Raneto-docker
+  # shell: make run
+  shell: make run conent_path={{ content_folder }}
+  args:
+    chdir: '{{ engine_folder }}'
+  ignore_errors: true
+  become: true
+
+# docker run -d --name gitlab-runner --restart always \
+#   -v /var/run/docker.sock:/var/run/docker.sock \
+#   -v /srv/gitlab-runner/config:/etc/gitlab-runner \
+#   gitlab/gitlab-runner:latest
+

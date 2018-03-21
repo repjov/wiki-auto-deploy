@@ -1,0 +1,42 @@
+---
+- name: set concurrent jobs
+  lineinfile:
+    dest: /etc/gitlab-runner/config.toml
+    regexp: '^concurrent = \d+'
+    line: 'concurrent = {{ gitlab_ci_concurrent|default(1) }} '
+    create: yes
+    owner: root
+    group: root
+    mode: 'u=rw,go='
+  notify: restart gitlab-runner
+
+- name: check registered runner
+  shell: grep -c 'name = "{{gitlab_ci_runner_registration[0].name}}"' /etc/gitlab-runner/config.toml
+  register: gitlab_ci_registered_runner_result
+  ignore_errors: true
+
+- name: register runner
+  command: >
+    gitlab-runner register -n
+    --url {{ item.url }}
+    --registration-token {{ item.token }}
+    --name {{ item.name }}
+    {{ (' --tag-list ' ~ "'" ~ item.tags|join(',') ~ "'") if (item.tags|length) else '' }}
+    {{ ' --run-untagged ' if (item.run_untagged|default(false)) else '' }}
+    --executor {{ item.executor|default('docker') }}
+    --locked={{ 'true' if (item.locked|default(false)) else 'false' }}
+    --docker-image {{ item.docker_image|default('python:2.7') }}
+    --locked={{ 'true' if item.locked|default(false) else 'false' }}
+    {{ ' --docker-privileged ' if (item.docker_privileged|default(false)) else '' }}
+    {{ '--cache-type s3'  if (item.cache|default(false)) else '' }}
+    {{ ('--cache-s3-server-address ' ~ item.cache_server) if (item.cache|default(false) and item.cache_server|default('') != '') else '' }}
+    {{ ('--cache-s3-access-key ' ~ item.cache_access_key) if (item.cache|default(false) and item.cache_access_key|default('') != '') else '' }}
+    {{ ('--cache-s3-secret-key ' ~ item.cache_secret_key) if (item.cache|default(false) and item.cache_secret_key|default('') != '') else '' }}
+    {{ ('--cache-s3-bucket-name ' ~ item.cache_bucket) if (item.cache|default(false) and item.cache_bucket|default('') != '') else '' }}
+    {{ ('--cache-s3-bucket-location ' ~ item.cache_bucket_region) if (item.cache|default(false) and item.cache_bucket_region|default('') != '') else '' }}
+    {{ ('--cache-s3-cache-path ' ~ item.cache_path) if (item.cache|default(false) and item.cache_path|default('') != '') else '' }}
+    {{ '--cache-s3-insecure ' if (item.cache_insecure|default(false)) else '' }}
+    {{ '--cache-cache-shared ' if (item.cache_shared|default(false)) else '' }}
+
+  when: gitlab_ci_registered_runner_result.stdout == '0'
+  with_items: "{{ gitlab_ci_runner_registration }}"

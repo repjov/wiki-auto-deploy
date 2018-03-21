@@ -1,0 +1,12 @@
+---
+- name: start cleanup docker container
+  docker_container:
+    name: "{{ gitlab_ci_cleanup_container_name }}"
+    image: "{{ gitlab_ci_cleanup_container_image }}"
+    env: "{{ gitlab_ci_cleanup_env }}"
+    command: redis-server --appendonly yes
+    restart_policy: always
+    state: present
+    recreate: yes
+    volumes: "{{ gitlab_ci_cleanup_container_volumes }}"
+  when: gitlab_ci_cleanup_docker_enabled

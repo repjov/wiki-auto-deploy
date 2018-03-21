@@ -1,0 +1,54 @@
+---
+gitlab_ci_runner_state: latest
+gitlab_ci_runner_version:
+
+gitlab_ci_concurrent: 1
+
+gitlab_ci_runner_registration:
+  - 
+    name: ci-runner.playbook
+    url: http://gitlab.lodoss.team/ci
+    token: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          35333031306365396439306363303030666139343538376363303965393736316264313261613362
+          6664363263336632303563616531636563646662663931620a613035326536643031653035336335
+          64653033353737343063393263353133633965363036663735353039373531333134623835323532
+          3732313436326165370a646566386532333832393932653365623065363666613230386136313866
+          61373931643932383739616666313566633666623135633065383361323032316435
+    executor: shell
+    locked: false
+    cache: false
+    run_untagged: true
+    tags: []
+    #     name: ci-runner<num>
+    #     url: https://git.kilix.net/ci
+    #     token: <gitlab ci token>
+    #     tags: []
+    #     run_untagged: true
+    #     executor: shell
+    #     locked: false
+    #     cache: false
+    #     cache_server:
+    #     cache_access_key:
+    #     cache_secret_key:
+    #     cache_bucket:
+    #     cache_bucket_region:
+    #     cache_path:  ci-runner<num>
+    #     cache_insecure: false
+    #     cache_shared: false
+
+gitlab_ci_cleanup_docker_enabled: false
+
+gitlab_ci_cleanup_container_name: gitlab-runner-docker-cleanup
+gitlab_ci_cleanup_container_image: quay.io/gitlab/gitlab-runner-docker-cleanup
+
+gitlab_ci_cleanup_env:
+  LOW_FREE_SPACE: 10G
+  EXPECTED_FREE_SPACE: 20G
+  LOW_FREE_FILES_COUNT: 1048576
+  EXPECTED_FREE_FILES_COUNT: 2097152
+  DEFAULT_TTL: 10m
+  USE_DF: 1
+
+gitlab_ci_cleanup_container_volumes:
+  - "/var/run/docker.sock:/var/run/docker.sock"

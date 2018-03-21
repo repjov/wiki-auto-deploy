@@ -1,0 +1,6 @@
+---
+# create workers
+- hosts: inside
+
+  roles:
+    - { role: ci.runner, become: yes }

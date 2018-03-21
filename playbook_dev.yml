@@ -1,0 +1,9 @@
+---
+# create workers
+- hosts: develop
+
+  roles:
+    - common
+    - { role: ansible.docker, become: yes }
+    - install.wiki
+    # - { role: ci.runner, become: yes }

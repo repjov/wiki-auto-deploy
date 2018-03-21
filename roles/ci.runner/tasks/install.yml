@@ -1,0 +1,26 @@
+---
+- name: add gitlab-ci runner repository GPG key
+  apt_key:
+    url: "{{ gitlab_ci_runner_apt_key }}"
+    state: present
+  when: ansible_lsb.id == 'Debian' or ansible_lsb.id == 'Ubuntu'
+
+- name: add gitlab-ci-runner main repository
+  apt_repository:
+    repo: '{{ item }} {{ gitlab_ci_runner_apt_url }}/{{ ansible_lsb.id|lower }}/ {{ ansible_lsb.codename|lower }} main'
+    state: present
+  with_items:
+    - deb
+    - deb-src
+  when: ansible_lsb.id == 'Debian' or ansible_lsb.id == 'Ubuntu'
+  register: gitlab_ci_runner_apt_result
+
+- name: apt update list for new gitlab-ci runner repository
+  apt:
+    update_cache: yes
+  when: gitlab_ci_runner_apt_result.changed
+
+- name: install gitlab-ci runner
+  apt:
+    name: "gitlab-runner{{ ('=' ~ gitlab_ci_runner_version) if gitlab_ci_runner_version != '' and gitlab_ci_runner_version is not none else '' }}"
+    state: "{{ 'present' if gitlab_ci_runner_version != '' and gitlab_ci_runner_version is not none else gitlab_ci_runner_state }}"

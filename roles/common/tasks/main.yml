@@ -1,0 +1,52 @@
+---
+- name: Install aptitude
+  become: true
+  apt:
+    pkg: aptitude
+    update_cache: yes
+
+# - name: Update and upgrade apt packages
+#   become: true
+#   apt:
+#     upgrade: yes
+#     update_cache: yes
+    # cache_valid_time: 86400 #One day
+
+- name: Install python-pycurl
+  apt:
+    pkg: python-pycurl
+    state: present
+  become: true
+
+- name: Install GIT
+  apt:
+    pkg: git
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Create Direcory
+  become: true
+  file:
+    path: "{{ ssh_path }}"
+    state: directory
+    mode: 0755
+
+- name: Upload deploy keys to User
+  copy:
+    src: './keys/{{ item.filename }}'
+    dest: '{{ ssh_path }}{{ item.filename }}'
+    mode: "{{ item.permission }}"
+  with_items:
+    - { filename: id_rsa, permission: 600 }
+    - { filename: id_rsa.pub, permission: 775 }
+
+- name: Upload deploy keys to Root
+  become: true
+  copy:
+    src: './keys/{{ item.filename }}'
+    dest: '{{ ssh_path }}{{ item.filename }}'
+    mode: "{{ item.permission }}"
+  with_items:
+    - { filename: id_rsa, permission: 600 }
+    - { filename: id_rsa.pub, permission: 775 }

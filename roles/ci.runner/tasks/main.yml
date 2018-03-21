@@ -1,0 +1,15 @@
+---
+- include: install.yml
+  tags:
+    - gitlab-ci-runner
+    - ci-runner
+
+- include: configure.yml
+  tags:
+    - gitlab-ci-runner
+    - ci-runner
+
+- include: cleanup.yml
+  tags:
+    - gitlab-ci-runner
+    - ci-runner
